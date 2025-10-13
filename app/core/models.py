@@ -1,5 +1,71 @@
 from django.db import models
 
+class Program(models.Model):
+    program_number = models.CharField(max_length=5, unique=True, blank=False)
+    program = models.CharField(max_length=255)
 
-class Sample(models.Model):
-    attachment = models.FileField()
+    def save(self, *args, **kwargs):
+        # Auto-generate program_number only if empty
+        if not self.pk and not self.program_number:  # only on creation
+            last = Program.objects.order_by('-id').first()
+            next_number = (last.id + 1) if last else 1
+            self.program_number = str(next_number)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Program {self.program_number}: {self.program}"
+
+    class Meta:
+        ordering = ['program_number']
+
+
+class SubProgram(models.Model):
+    program = models.ForeignKey(Program, on_delete=models.CASCADE, related_name='subprograms')
+    subprogram_number = models.CharField(max_length=5, blank=False)
+    subprogram = models.CharField(max_length=255)
+
+    def save(self, *args, **kwargs):
+        # Auto-generate subprogram_number per program only if empty
+        if not self.subprogram_number:
+            last = SubProgram.objects.filter(program=self.program).order_by('-id').first()
+            if last and last.subprogram_number.isdigit():
+                next_number = int(last.subprogram_number) + 1
+            else:
+                next_number = 1
+            self.subprogram_number = str(next_number)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        # single-line representation for admin
+        return f"{self.program.program_number}.{self.subprogram_number} {self.subprogram}"
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['program', 'subprogram_number'],
+                name='unique_subprogram_per_program'
+            )
+        ]
+
+        ordering = ['program__program_number', 'subprogram_number']
+
+class Activity(models.Model):
+    subprogram = models.ForeignKey(SubProgram, on_delete=models.CASCADE, related_name='activities')
+    activity_number = models.CharField(max_length=5, blank=False)
+    activity = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"{self.subprogram.program.program_number}.{self.subprogram.subprogram_number}.{self.activity_number} {self.activity}"
+
+    class Meta:
+        verbose_name_plural = "Activities"
+        constraints = [
+            models.UniqueConstraint(
+                fields=['subprogram', 'activity_number'],
+                name='unique_activity_per_subprogram'
+            )
+        ]
+        # Only order by fields that exist on this model
+        ordering = ['activity_number']
+
+
