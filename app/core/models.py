@@ -1,8 +1,8 @@
 from django.db import models
 
 class Program(models.Model):
-    program_number = models.CharField(max_length=5, unique=True, blank=False)
-    program = models.CharField(max_length=255)
+    program_number = models.IntegerField(max_length=5, unique=True, blank=False)
+    program = models.CharField(max_length=255, blank=False, verbose_name="Program Name")
 
     def save(self, *args, **kwargs):
         # Auto-generate program_number only if empty
@@ -20,9 +20,15 @@ class Program(models.Model):
 
 
 class SubProgram(models.Model):
-    program = models.ForeignKey(Program, on_delete=models.CASCADE, related_name='subprograms')
-    subprogram_number = models.CharField(max_length=5, blank=False)
-    subprogram = models.CharField(max_length=255)
+    program = models.ForeignKey(
+        Program,
+        on_delete=models.CASCADE,
+        related_name='subprograms',
+        verbose_name="Program Name"
+    )
+    
+    subprogram_number = models.IntegerField(max_length=5, blank=False, verbose_name="Sub-Program Number")
+    subprogram = models.CharField(max_length=255, blank=False, verbose_name="Sub-Program Name")
 
     def save(self, *args, **kwargs):
         # Auto-generate subprogram_number per program only if empty
@@ -50,9 +56,14 @@ class SubProgram(models.Model):
         ordering = ['program__program_number', 'subprogram_number']
 
 class Activity(models.Model):
-    subprogram = models.ForeignKey(SubProgram, on_delete=models.CASCADE, related_name='activities')
-    activity_number = models.CharField(max_length=5, blank=False)
-    activity = models.CharField(max_length=255)
+    subprogram = models.ForeignKey(
+        SubProgram,
+        on_delete=models.CASCADE,
+        related_name='activities',
+        verbose_name="Sub-Program Name"
+    )
+    activity_number = models.IntegerField(max_length=5, blank=False)
+    activity = models.CharField(max_length=255, blank=False, verbose_name="Activity Name")
 
     def __str__(self):
         return f"{self.subprogram.program.program_number}.{self.subprogram.subprogram_number}.{self.activity_number} {self.activity}"
@@ -65,7 +76,38 @@ class Activity(models.Model):
                 name='unique_activity_per_subprogram'
             )
         ]
-        # Only order by fields that exist on this model
-        ordering = ['activity_number']
+    ordering = ['activity_number']
+
+class SubActivity(models.Model):
+    activity = models.ForeignKey(
+        Activity,
+        on_delete=models.CASCADE,
+        related_name='subactivities',
+        verbose_name="Activity"
+    )
+    subactivity_number = models.CharField(max_length=5, blank=False, verbose_name="Sub-Activity Number")
+    subactivity = models.CharField(max_length=255, blank=False, verbose_name="Sub-Activity Name")
+
+    def __str__(self):
+        return f"{self.activity.subprogram.program.program_number}." \
+               f"{self.activity.subprogram.subprogram_number}." \
+               f"{self.activity.activity_number}." \
+               f"{self.subactivity_number} {self.subactivity}"
+
+    class Meta:
+        verbose_name_plural = "Sub-Activities"
+        constraints = [
+            models.UniqueConstraint(
+                fields=['activity', 'subactivity_number'],
+                name='unique_subactivity_per_activity'
+            )
+        ]
+        ordering = [
+            'activity__subprogram__program__program_number',
+            'activity__subprogram__subprogram_number',
+            'activity__activity_number',
+            'subactivity_number'
+        ]
+
 
 

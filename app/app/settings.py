@@ -38,6 +38,7 @@ ALLOWED_HOSTS.extend(
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin', 
     'nested_admin',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -143,3 +144,16 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+JAZZMIN_SETTINGS = {
+    "site_title": "Weaving Threads Admin",
+    "site_header": "Weaving Threads",
+    "site_brand": "Weaving Threads Portal",
+
+    # 👇 Reorder the admin menu here
+    "order_with_respect_to": [
+        "core.Program",
+        "core.SubProgram",
+        "core.Activity",
+    ],
+}
