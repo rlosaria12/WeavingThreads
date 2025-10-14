@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'core',
+    'enduser',
 ]
 
 MIDDLEWARE = [
@@ -150,10 +151,19 @@ JAZZMIN_SETTINGS = {
     "site_header": "Weaving Threads",
     "site_brand": "Weaving Threads Portal",
 
-    # 👇 Reorder the admin menu here
+    # Order apps in the sidebar (core first, enduser last)
+    "custom_app_order": ["core", "enduser"],
+
+     # Order models within each app
     "order_with_respect_to": [
         "core.Program",
         "core.SubProgram",
         "core.Activity",
+        "core.SubActivity",
+        "enduser.EndUser",
     ],
+
+    "show_sidebar": True,
+    "navigation_expanded": True,
 }
+
