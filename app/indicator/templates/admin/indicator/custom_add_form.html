@@ -70,7 +70,7 @@
                     </form>
 
                     {% if subprograms %}
-                        <form form method="get" action=""> 
+                        <form form method="POST" action=""> 
                             {% csrf_token %}
                             <input type="hidden" name="year" value="{{ year }}">
                             <input type="hidden" name="program" value="{{ selected_program }}">

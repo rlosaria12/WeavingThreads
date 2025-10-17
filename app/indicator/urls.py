@@ -1,6 +1,6 @@
 from django.urls import path
-from . import views
+from .views import indicator_list_view
 
 urlpatterns = [
-    path('program-indicator/', views.program_indicator, name='program_indicator'),
+    path('indicators/', indicator_list_view, name='indicator-list'),
 ]
