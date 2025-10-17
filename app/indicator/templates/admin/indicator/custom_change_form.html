@@ -1,0 +1,15 @@
+{% extends "admin/change_form.html" %}
+{% load static i18n %}
+
+{% block content %}
+
+<div class="card p-4" style="background: #fff;">
+    {{ adminform.form.as_p }}
+</div>
+
+<div style="margin-top: 1rem;">
+    {% submit_row %}
+</div>
+
+<a href="{% url 'admin:indicator_indicator_changelist' %}" class="button" style="margin-top:1rem; display:inline-block;">← Back to list</a>
+{% endblock %}

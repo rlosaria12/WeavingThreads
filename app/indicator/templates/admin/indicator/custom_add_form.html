@@ -1,0 +1,164 @@
+{% extends "admin/change_form.html" %}
+{% load static i18n custom_tags %}
+
+{% load static i18n %}
+
+{% block content %}
+<div class="content" style="width: 100% !important;">
+    <div class="container-fluid">
+        <section id="content" class="content">
+            <div class="row">
+                <div id="content-main" class="col-12">
+                    <form method="get" action=""> 
+                        <div class="row">
+                            <div class="col-12 col-lg-9">
+                                <div class="card">
+                                    <div class="card-body">
+
+                                        <!-- FY -->
+                                        <div class="form-group field-year">
+                                            <div class="row">
+                                                <label class="col-sm-3 text-left" for="id_year">
+                                                   Fiscal Year <span class="text-red">*</span>
+                                                </label>
+                                                <div class="col-sm-2 field-year">
+                                                    <select name="year" id="id_year" class="vTextField" required>
+                                                        <option value="">-- Select Year --</option>
+                                                        {% for y in 2021|to:2035 %}
+                                                            <option value="{{ y }}" {% if y|stringformat:"s" == year|stringformat:"s" %}selected{% endif %}>
+                                                                {{ y }}
+                                                            </option>
+                                                        {% endfor %}
+                                                    </select>
+
+                                                    <div class="help-block red"></div>
+                                                    <div class="help-block text-red"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Program -->
+                                        <div class="form-group field-program">
+                                            <div class="row">
+                                                <label class="col-sm-3 text-left" for="id_field-program">
+                                                    Program <span class="text-red">*</span>
+                                                </label>
+                                                <div class="col-sm-7 field-program">
+                                                    <select name="program"
+                                                            required
+                                                            id="id_field-program"
+                                                            onchange="this.form.submit()">
+
+                                                            <option value="">-- Select Program --</option>
+                                                            {% for p in programs %}
+                                                                <option value="{{ p.id }}" {% if p.id|stringformat:'s' == selected_program %}selected{% endif %}>{{ p }}</option>
+                                                            {% endfor %}
+
+                                                    </select>                                                    
+                                                        <span class="dropdown-wrapper" aria-hidden="true"></span>
+                                                    </span>
+
+                                                    <div class="help-block red"></div>
+                                                    <div class="help-block text-red"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>                            
+                        </div>
+                    </form>
+
+                    {% if subprograms %}
+                        <form form method="get" action=""> 
+                            {% csrf_token %}
+                            <input type="hidden" name="year" value="{{ year }}">
+                            <input type="hidden" name="program" value="{{ selected_program }}">
+
+                            <div class="row">
+                                <div class="col-12 col-lg-9">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <!-- Table -->
+                                            <h3 style="margin-top: 1.5rem;">Sub-Programs and Activities</h3>
+                                            <table class="table table-striped table-bordered">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Sub-Program</th>
+                                                        <th>Output Indicator(s)</th>
+                                                        <th>Target Indicator(s)</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for sub in subprograms %}
+                                                        <!-- Subprogram header row -->
+                                                        <tr class="table-primary">
+                                                            <td colspan="3"> <strong> {{ sub.program.program_number }}.{{ sub.subprogram_number }}: {{ sub.subprogram}}</strong></td>
+                                                        </tr>
+
+                                                        {% with activities=activities_by_subprogram|get_item:sub.id %}
+                                                            {% if activities %}
+                                                                {% for act in activities %}
+                                                                    <tr>
+                                                                        <td style="padding-left: 30px;">
+                                                                            {{ sub.program.program_number }}.{{ sub.subprogram_number }}.{{ act.activity_number }}: {{ act.activity }}
+                                                                            <input type="hidden" name="activity_id" value="{{ act.id }}">
+                                                                        </td>
+                                                                        <td><input type="text" name="output_indicator_{{ act.id }}" class="vTextField"></td>
+                                                                        <td><input type="text" name="target_indicator_{{ act.id }}" class="vTextField"></td>
+                                                                    </tr>
+                                                                {% endfor %}
+                                                            {% else %}
+                                                                <tr>
+                                                                    <td colspan="3"><em>No activities found for {{ sub.subprogram_label }}</em></td>
+                                                                </tr>
+                                                            {% endif %}
+                                                        {% endwith %}
+                                                    {% endfor %}
+                                                </tbody>
+
+                                            </table>                                        
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Right Column (Actions) -->
+                                <div class="col-12 col-lg-3">
+                                    <div id="jazzy-actions">
+                                        <div>
+                                            <div class="form-group">
+                                                <input type="submit"
+                                                    value="Save"
+                                                    class="btn btn-success form-control"
+                                                    name="_save">
+                                            </div>
+                                            <div class="form-group">
+                                                <input type="submit"
+                                                    value="Save and add another"
+                                                    class="btn btn-info form-control"
+                                                    name="_addanother">
+                                            </div>
+                                            <div class="form-group">
+                                                <input type="submit"
+                                                    value="Save and continue editing"
+                                                    class="btn btn-info form-control"
+                                                    name="_continue">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+
+{% if saved %}
+<p style="color: green; margin-top: 1rem;">✅ Indicators saved successfully!</p>
+{% endif %}
+
+{% endblock %}

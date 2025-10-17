@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'core',
     'enduser',
+    'indicator',
 ]
 
 MIDDLEWARE = [
@@ -161,9 +162,12 @@ JAZZMIN_SETTINGS = {
         "core.Activity",
         "core.SubActivity",
         "enduser.EndUser",
+        "indicator.Indicator",
     ],
 
     "show_sidebar": True,
     "navigation_expanded": True,
+
+    
 }
 
